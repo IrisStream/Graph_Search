@@ -62,18 +62,50 @@ def DFS(graph, edges, edge_id, start, goal):
     while(len(s) != 0):
         u = s.pop()
         changeColor(graph, u, yellow)
-        for v in graph[u][1]:
+        for i in range(len(graph[u][1])-1,-1,-1):   #Loop down-to in the adjacent set of U, so we cant put the smallest index adj to to top of stack after loop
+            v = graph[u][1][i]
             if(graph[v][3] == black):
                 trace[v] = u
                 s.append(v)
-                edges[edge_id(u,v)][1] = white
-                changeColor(graph, v, red)
                 if v == goal:
                     traceroute(graph, edges, edge_id, trace, start, goal)
                     return
+        edges[edge_id(u,s[-1])][1] = white
+        changeColor(graph, s[-1], red)
         changeColor(graph, u, blue)
     pass
 
+def up_heap(heap, cur):
+    par = (cur - 1) / 2
+    if(heap[par][1] >= heap[cur][1]):
+        tmp = heap[par][1]
+        heap[par][1] = heap[cur][1]
+        heap[cur][1] = tmp
+        up_heap(heap, par)
+
+def down_heap(heap, cur):
+    for child in range(cur*2+1, cur*2 +3):
+        if(child >= len(heap)):
+            return
+        if(heap[child][1] < heap[cur][1]):
+            tmp = heap[child][1]
+            heap[child][1] = heap[cur][1]
+            heap[cur][1] = tmp
+            down_heap(heap, child)
+            break
+
+
+def push_heap(heap, node, cost):
+    heap.append((node, cost))
+    if(len(heap) > 1):
+        up_head(heap, len(heap) - 1)
+
+def pop_heap(heap):
+    ans = heap[0]
+    heap[0] = heap[-1]
+    heap.pop()
+    down_heap(heap, 0)
+    return ans
 
 def UCS(graph, edges, edge_id, start, goal):
     """
@@ -81,6 +113,16 @@ def UCS(graph, edges, edge_id, start, goal):
     """
     # TODO: your code
     print("Implement Uniform Cost Search algorithm.")
+    heap = []
+    heap.append((start,0))
+    while(len(heap) > 0):
+        u = pop_heap(heap)
+        if(u[0] == goal):
+            pass
+        if(min_cost[u] < u[1]):
+            continue
+        for v in graph[u[0]][1]:
+            if(graph[v][3] == 
     pass
 
 
