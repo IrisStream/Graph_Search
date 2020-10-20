@@ -14,7 +14,7 @@ def changeColor(graph, node, color):
     graph[node][3] = color
     graph[node][2] = white
     graphUI.updateUI()
-    pygame.time.delay(500)
+    pygame.time.delay(1000)
 
 def trace_route(graph, edges, edge_id, trace, start, goal):
     cur = goal
@@ -124,9 +124,6 @@ def UCS(graph, edges, edge_id, start, goal):
     trace = list(range(0,len(graph)))
     min_cost = list(range(0,len(graph)))
     while(len(heap) > 0):
-        for x in heap:
-            print(x)
-        print("\n")
         u = pop_heap(heap)
         if(u[0] == goal):
             pass
@@ -153,7 +150,7 @@ def AStar(graph, edges, edge_id, start, goal):
     """
     # TODO: your code
     def cost(u,v):
-        return math.sqrt((graph[u][0][0] - graph[v][0][0]) * (graph[u][0][0] - graph[v][0][0]) * (graph[u][0][1] - graph[v][0][1]) * (graph[u][0][1] - graph[v][0][1]))
+        return math.sqrt((graph[u][0][0] - graph[v][0][0]) * (graph[u][0][0] - graph[v][0][0]) + (graph[u][0][1] - graph[v][0][1]) * (graph[u][0][1] - graph[v][0][1]))
 
     print("Implement A* algorithm.")
     trace = list(range(0,len(graph)))
