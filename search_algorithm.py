@@ -1,4 +1,5 @@
 import pygame
+import math
 import graphUI
 import queue
 from node_color import white, yellow, black, red, blue, purple, orange, green
@@ -15,7 +16,7 @@ def changeColor(graph, node, color):
     graphUI.updateUI()
     pygame.time.delay(500)
 
-def traceroute(graph, edges, edge_id, trace, start, goal):
+def trace_route(graph, edges, edge_id, trace, start, goal):
     cur = goal
     graph[start][3] = orange
     graph[goal][3] = purple
@@ -44,7 +45,7 @@ def BFS(graph, edges, edge_id, start, goal):
                 edges[edge_id(u,v)][1] = white
                 changeColor(graph, v, red)
                 if v == goal:
-                    traceroute(graph, edges, edge_id, trace, start, goal)
+                    trace_route(graph, edges, edge_id, trace, start, goal)
                     return
         changeColor(graph, u, blue)
     pass
@@ -68,62 +69,82 @@ def DFS(graph, edges, edge_id, start, goal):
                 trace[v] = u
                 s.append(v)
                 if v == goal:
-                    traceroute(graph, edges, edge_id, trace, start, goal)
+                    trace_route(graph, edges, edge_id, trace, start, goal)
                     return
         edges[edge_id(u,s[-1])][1] = white
         changeColor(graph, s[-1], red)
         changeColor(graph, u, blue)
     pass
 
-def up_heap(heap, cur):
-    par = (cur - 1) / 2
-    if(heap[par][1] >= heap[cur][1]):
-        tmp = heap[par][1]
-        heap[par][1] = heap[cur][1]
-        heap[cur][1] = tmp
-        up_heap(heap, par)
-
-def down_heap(heap, cur):
-    for child in range(cur*2+1, cur*2 +3):
-        if(child >= len(heap)):
-            return
-        if(heap[child][1] < heap[cur][1]):
-            tmp = heap[child][1]
-            heap[child][1] = heap[cur][1]
-            heap[cur][1] = tmp
-            down_heap(heap, child)
-            break
-
 
 def push_heap(heap, node, cost):
-    heap.append((node, cost))
-    if(len(heap) > 1):
-        up_head(heap, len(heap) - 1)
+    x = (node, cost)
+    cur = len(heap)
+    heap.append(x)
+    while(cur > 0):
+        par = (cur - 1) // 2
+        if(heap[par][1] >= x[1]):
+            heap[cur] = heap[par]
+        else:
+            break
+        cur = par
+    heap[cur] = x
 
 def pop_heap(heap):
     ans = heap[0]
     heap[0] = heap[-1]
+    x = heap[0]
     heap.pop()
-    down_heap(heap, 0)
+    cur = 0
+    while(cur * 2 + 2 < len(heap)):
+        flag = 0
+        for child in range(cur * 2 + 1, cur * 2 + 3):
+            if(heap[child][1] < x[1]):
+                heap[cur] = heap[child]
+                cur = child
+                flag = 1
+                break
+        if(flag == 0):
+            break
     return ans
+
+INF = 1000000000
 
 def UCS(graph, edges, edge_id, start, goal):
     """
     Uniform Cost Search search
     """
     # TODO: your code
+    def cost(u,v):
+        return math.sqrt((graph[u][0][0] - graph[v][0][0]) * (graph[u][0][0] - graph[v][0][0]) * (graph[u][0][1] - graph[v][0][1]) * (graph[u][0][1] - graph[v][0][1]))
+
     print("Implement Uniform Cost Search algorithm.")
     heap = []
     heap.append((start,0))
+    trace = list(range(0,len(graph)))
+    min_cost = list(range(0,len(graph)))
     while(len(heap) > 0):
+        for x in heap:
+            print(x)
+        print("\n")
         u = pop_heap(heap)
         if(u[0] == goal):
             pass
-        if(min_cost[u] < u[1]):
+        if(min_cost[u[0]] < u[1]):
             continue
-        for v in graph[u[0]][1]:
-            if(graph[v][3] == 
-    pass
+        u = u[0]
+        if(u == goal):
+            trace_route(graph, edges, edge_id, trace, start, goal)
+            break
+        changeColor(graph, u, yellow)
+        for v in graph[u][1]:
+            if(graph[v][3] == black or (graph[v][3] == red and min_cost[v] > min_cost[u] + cost(u,v))):
+                min_cost[v] = min_cost[u] + cost(u,v)
+                trace[v] = u
+                push_heap(heap, v, min_cost[v])
+                edges[edge_id(u,v)][1] = white
+                changeColor(graph, v, red)
+        changeColor(graph, u, blue)
 
 
 def AStar(graph, edges, edge_id, start, goal):
@@ -131,7 +152,41 @@ def AStar(graph, edges, edge_id, start, goal):
     A star search
     """
     # TODO: your code
+    def cost(u,v):
+        return math.sqrt((graph[u][0][0] - graph[v][0][0]) * (graph[u][0][0] - graph[v][0][0]) * (graph[u][0][1] - graph[v][0][1]) * (graph[u][0][1] - graph[v][0][1]))
+
     print("Implement A* algorithm.")
+    trace = list(range(0,len(graph)))
+    min_f = list(range(0,len(graph)))
+    for i in range(0, len(graph)):
+        min_f[i] = INF
+    min_f[start] = cost(start, goal)
+    min_cost = list(range(0,len(graph)))
+    for i in range(0, len(graph)):
+        min_cost[i] = INF
+    min_cost[start] = 0
+    heap = []
+    heap.append((start, min_f[start]))
+    while(len(heap) > 0):
+        u = pop_heap(heap)
+        if(u[0] == goal):
+            pass
+        if(min_f[u[0]] < u[1]):
+            continue
+        u = u[0]
+        if(u == goal):
+            trace_route(graph, edges, edge_id, trace, start, goal)
+            break
+        changeColor(graph, u, yellow)
+        for v in graph[u][1]:
+            if(min_cost[v] > min_cost[u] + cost(u,v)):
+                min_cost[v] = min_cost[u] + cost(u,v)
+                min_f[v] = min_cost[v] + cost(v, goal)
+                trace[v] = u
+                push_heap(heap, v, min_f[v])
+                edges[edge_id(u,v)][1] = white
+                changeColor(graph, v, red)
+        changeColor(graph, u, blue)
     pass
 
 
