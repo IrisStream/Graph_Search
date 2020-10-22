@@ -25,10 +25,11 @@ if __name__ == '__main__':
         print("WARMING: Must be provided enough argument!\n")
 
     input_file_name = str(sys.argv[1])
+    #input_file_name = 'input.txt'
     if len(sys.argv) == 3:
         search_alg = str(sys.argv[2])
     else:
         search_alg = None
-
+    #search_alg = 'ucs'
     start, goal, graph = read_graph(input_file_name)
     graphUI.run(graph, start, goal, search_alg)

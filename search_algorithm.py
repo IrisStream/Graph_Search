@@ -14,7 +14,7 @@ def changeColor(graph, node, color):
     graph[node][3] = color
     graph[node][2] = white
     graphUI.updateUI()
-    pygame.time.delay(1000)
+    pygame.time.delay(400)
 
 def trace_route(graph, edges, edge_id, trace, start, goal):
     cur = goal
@@ -92,20 +92,20 @@ def push_heap(heap, node, cost):
 
 def pop_heap(heap):
     ans = heap[0]
-    heap[0] = heap[-1]
-    x = heap[0]
+    x = heap[-1]
     heap.pop()
+    if(len(heap) == 0):
+        return ans
     cur = 0
-    while(cur * 2 + 2 < len(heap)):
-        flag = 0
-        for child in range(cur * 2 + 1, cur * 2 + 3):
-            if(heap[child][1] < x[1]):
-                heap[cur] = heap[child]
-                cur = child
-                flag = 1
-                break
-        if(flag == 0):
+    while(cur * 2 + 1 < len(heap)):
+        child = cur * 2 + 1
+        if(cur * 2 + 2 < len(heap) and heap[cur * 2 + 2][1] < heap[child][1]):
+            child = cur * 2 + 2
+        if(heap[child][1] >= x[1]):
             break
+        heap[cur] = heap[child]
+        cur = child
+    heap[cur] = x
     return ans
 
 INF = 1000000000
@@ -116,17 +116,21 @@ def UCS(graph, edges, edge_id, start, goal):
     """
     # TODO: your code
     def cost(u,v):
-        return math.sqrt((graph[u][0][0] - graph[v][0][0]) * (graph[u][0][0] - graph[v][0][0]) * (graph[u][0][1] - graph[v][0][1]) * (graph[u][0][1] - graph[v][0][1]))
+        return math.sqrt((graph[u][0][0] - graph[v][0][0]) * (graph[u][0][0] - graph[v][0][0]) + (graph[u][0][1] - graph[v][0][1]) * (graph[u][0][1] - graph[v][0][1]))
 
     print("Implement Uniform Cost Search algorithm.")
     heap = []
     heap.append((start,0))
     trace = list(range(0,len(graph)))
     min_cost = list(range(0,len(graph)))
+    for i in range(len(graph)):
+        min_cost[i] = INF
+    min_cost[start] = 0
     while(len(heap) > 0):
+        for i in heap:
+            print(i)
+        print("\n")
         u = pop_heap(heap)
-        if(u[0] == goal):
-            pass
         if(min_cost[u[0]] < u[1]):
             continue
         u = u[0]
@@ -135,7 +139,7 @@ def UCS(graph, edges, edge_id, start, goal):
             break
         changeColor(graph, u, yellow)
         for v in graph[u][1]:
-            if(graph[v][3] == black or (graph[v][3] == red and min_cost[v] > min_cost[u] + cost(u,v))):
+            if(min_cost[v] > min_cost[u] + cost(u,v)):
                 min_cost[v] = min_cost[u] + cost(u,v)
                 trace[v] = u
                 push_heap(heap, v, min_cost[v])
