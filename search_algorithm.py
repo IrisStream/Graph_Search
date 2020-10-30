@@ -14,7 +14,7 @@ def changeColor(graph, node, color):
     graph[node][3] = color
     graph[node][2] = white
     graphUI.updateUI()
-    pygame.time.delay(400)
+    pygame.time.delay(200)
 
 def trace_route(graph, edges, edge_id, trace, start, goal):
     cur = goal
@@ -37,6 +37,9 @@ def BFS(graph, edges, edge_id, start, goal):
     q.put(start)
     while(q.empty() == False):
         u = q.get()
+        if u == goal:
+            trace_route(graph, edges, edge_id, trace, start, goal)
+            return
         changeColor(graph, u, yellow)
         for v in graph[u][1]:
             if(graph[v][3] == black):
@@ -48,7 +51,6 @@ def BFS(graph, edges, edge_id, start, goal):
                     trace_route(graph, edges, edge_id, trace, start, goal)
                     return
         changeColor(graph, u, blue)
-    pass
 
 
 def DFS(graph, edges, edge_id, start, goal):
@@ -62,19 +64,20 @@ def DFS(graph, edges, edge_id, start, goal):
     s.append(start)
     while(len(s) != 0):
         u = s.pop()
+        if u == goal:
+            trace_route(graph, edges, edge_id, trace, start, goal)
+            return
         changeColor(graph, u, yellow)
-        for i in range(len(graph[u][1])-1,-1,-1):   #Loop down-to in the adjacent set of U, so we cant put the smallest index adj to to top of stack after loop
-            v = graph[u][1][i]
+        for v in graph[u][1]:
             if(graph[v][3] == black):
                 trace[v] = u
                 s.append(v)
+                edges[edge_id(u,v)][1] = white
+                changeColor(graph, v, red)
                 if v == goal:
                     trace_route(graph, edges, edge_id, trace, start, goal)
                     return
-        edges[edge_id(u,s[-1])][1] = white
-        changeColor(graph, s[-1], red)
         changeColor(graph, u, blue)
-    pass
 
 
 def push_heap(heap, node, cost):

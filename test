@@ -1,0 +1,11 @@
+#!/bin/bash
+
+search_alg=(bfs dfs ucs a_star)
+
+for i in 1 2 3
+do
+    for j in ${search_alg[@]}
+    do
+        python main.py testcase$i.txt $j
+    done
+done
